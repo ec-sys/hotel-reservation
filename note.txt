@@ -1,0 +1,99 @@
+mvn package -Dmaven.test.skip
+docker build --tag longdd90jp/aws-esc:zenblog-api-server.1.0 .
+
+docker build --tag longdd90jp/aws-esc:zenblog-api.1.0 .
+docker run --name ecs-api -it --rm -p 8080:8080 longdd90jp/aws-esc:zenblog-api.1.0
+
+-----
+docker build --tag longdd90jp/aws-esc:aws-config-server.0.1 .
+docker build --tag longdd90jp/aws-esc:aws-service-discovery.0.1 .
+docker build --tag longdd90jp/aws-esc:aws-api-gateway.0.1 .
+docker build --tag longdd90jp/aws-esc:aws-service-post.0.1 .
+
+
+sudo aws s3 cp s3://dangtit90/config_server-0.1.jar config_server-0.1.jar
+sudo aws s3 cp s3://dangtit90/service-discovery-0.1.jar service-discovery-0.1.jar
+sudo aws s3 cp s3://dangtit90/api_gateway-0.1.jar api_gateway-0.1.jar
+sudo aws s3 cp s3://dangtit90/service-post-0.1.jar service-post-0.1.jar
+
+
+java -jar D:\\soft\\zipkin-server-2.24.3-exec.jar
+
+kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
+
+docker context use default
+minikube start -p multi-node
+minikube dashboard -p multi-node
+minikube profile list
+minikube start -p minikube
+minikube dashboard -p minikube
+
+skaffold dev --no-prune=false --cache-artifacts=false
+
+skaffold delete
+
+skaffold run --profile zenblog
+
+kubectl label namespace zenblog istio-injection=enabled
+kubectl get namespace -L istio-injection
+kubectl label namespace default istio-injection-
+
+if you want to access through ingress then you need run (minikube tunnel)
+http://127.0.0.1/api/uaa/auth/login
+
+when use zippin with istio then need setting something for can work
+
+disable
+kubectl label namespace default istio-injection-
+
+https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/
+https://medium.com/@viggnah/how-to-deploy-envoy-as-a-sidecar-proxy-on-kubernetes-c3a3ad3935ee
+https://medium.com/@viggnah/how-to-deploy-envoy-as-an-edge-proxy-on-kubernetes-f1af78e1ebfb
+
+kubectl apply -k base
+
+kubectl port-forward svc/mainapp-envoy-sidecar-svc -n dev-envoy 5190:5199
+
+kubectl port-forward svc/mysql-svc -n dev-envoy 3307:3306
+
+minikube addons enable metrics-server -p minikube
+
+kubectl create namespace envoy-grpc
+
+kubectl port-forward svc/zipkin-server -n dev-envoy 9411:9411
+awslocal sqs create-queue --queue-name stratospheric-todo-sharing
+awslocal sqs create-queue --queue-name order-create-queue
+aws sqs list-queues
+
+awslocal sqs delete-queue --queue-url http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/order-process-queue
+
+awslocal sns create-topic --name order-process-topic
+awslocal sns subscribe --topic-arn "arn:aws:sns:us-east-1:000000000000:order-process-topic" --protocol sqs --notification-endpoint "arn:aws:sqs:us-east-1:000000000000:order-inventory-queue"
+awslocal sns subscribe --topic-arn "arn:aws:sns:us-east-1:000000000000:order-process-topic" --protocol sqs --notification-endpoint "arn:aws:sqs:us-east-1:000000000000:order-customer-queue"
+awslocal sns create-topic --name order-create-queue
+
+kubectl port-forward --address 0.0.0.0 pod/mypod 8888:5000
+kubectl port-forward --address 0.0.0.0 svc/mysql-svc -n dev-envoy 3307:3306
+kubectl get secret -n loki-stack loki-grafana -o jsonpath="{.data.admin-password}" | base64 --decode; echo
+
+helm repo add grafana https://grafana.github.io/helm-charts
+helm upgrade --install loki --create-namespace --namespace=loki-stack grafana/loki-stack --set grafana.enabled=true
+kubectl get pod -n loki-stack
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install prometheus-stack --namespace prometheus-stack --create-namespace prometheus-community/kube-prometheus-stack -f prometheus.yaml
+
+kubectl port-forward --namespace loki-stack service/loki-grafana 3000:80
+
+docker-compose -f docker-compose-app.yml up
+docker build --tag longdd90jp/api-gateway:1.0 .
+docker build --tag longdd90jp/service-uaa:1.0 .
+docker build --tag longdd90jp/service-post:1.0 .
+docker build --tag longdd90jp/service-comment:1.0 .
+
+kubectl port-forward --namespace dev-infa svc/grafana 3000:3000
+kubectl get secret -n dev-infa grafana -o jsonpath="{.data.admin-password}" | base64 --decode; echo
+kubectl port-forward --namespace dev-envoy svc/api-gateway 8080:8080
+
+aws --endpoint-url http://localhost:4566 s3api list-buckets
